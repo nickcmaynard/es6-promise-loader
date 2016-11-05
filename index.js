@@ -6,7 +6,7 @@
  Shamelessly based on bundle-loader by Tobias Koppers @sokra
  */
 
- var path = require('path');
+var path = require('path');
 
 module.exports = function () {};
 module.exports.pitch = function (remainingRequest) {
@@ -20,15 +20,20 @@ module.exports.pitch = function (remainingRequest) {
 
   var result = [
     'module.exports = function (namespace) {\n',
-    '  return new Promise(function (resolve) {\n',
-    '    require.ensure([], function (require) {\n',
-    '      if (namespace) {\n',
-    '        resolve(require(', JSON.stringify('!!' + remainingRequest), ')[namespace]);\n',
-    '      } else {\n',
-    '        var mod = require(', JSON.stringify('!!' + remainingRequest), ');\n',
-    '        resolve(mod.__esModule ? mod.default : mod)\n',
-    '      }\n',
-    '    }' + (bundleName && (', ' + JSON.stringify(bundleName))) + ');\n',
+    '  return new Promise(function (resolve, reject) {\n',
+    '    try {\n',
+    '      require.ensure([], function (require) {\n',
+    '        if (namespace) {\n',
+    '          resolve(require(', JSON.stringify('!!' + remainingRequest), ')[namespace]);\n',
+    '        } else {\n',
+    '          var mod = require(', JSON.stringify('!!' + remainingRequest), ');\n',
+    '          resolve(mod.__esModule ? mod.default : mod)\n',
+    '        }\n',
+    '      }' + (bundleName && (', ' + JSON.stringify(bundleName))) + ');\n',
+    '    } catch (err) {\n',
+    '      // Couldn\'t get the require\n',
+    '      reject(err);\n',
+    '    }\n',
     '  });\n',
     '}'
   ];
